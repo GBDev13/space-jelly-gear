@@ -5,6 +5,7 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 import Layout from "@components/Layout";
 import Container from "@components/Container";
 import Button from "@components/Button";
+import Map from "@components/Map";
 
 import styles from "@styles/Page.module.scss";
 
@@ -45,7 +46,32 @@ export default function Stores({ storeLocations }) {
 
           <div className={styles.storesMap}>
             <div className={styles.storesMapContainer}>
-              <div className={styles.map}>Map</div>
+              <Map className={styles.map} center={[0, 0]} zoom={2}>
+                {({ TileLayer, Marker, Popup }, map) => {
+                  return (
+                    <>
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      {storeLocations.map((location) => {
+                        const { latitude, longitude } = location.location;
+                        return (
+                          <Marker
+                            key={location.id}
+                            position={[latitude, longitude]}
+                          >
+                            <Popup>
+                              <p>{location.name}</p>
+                              <p>{location.address}</p>
+                            </Popup>
+                          </Marker>
+                        );
+                      })}
+                    </>
+                  );
+                }}
+              </Map>
             </div>
           </div>
         </div>
