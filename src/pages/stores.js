@@ -1,13 +1,14 @@
-import Head from 'next/head'
-import { FaExternalLinkAlt } from 'react-icons/fa';
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
+import Head from "next/head";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
-import Layout from '@components/Layout';
-import Container from '@components/Container';
-import Button from '@components/Button';
+import Layout from "@components/Layout";
+import Container from "@components/Container";
+import Button from "@components/Button";
 
-import styles from '@styles/Page.module.scss'
+import styles from "@styles/Page.module.scss";
 
-export default function Stores() {
+export default function Stores({ storeLocations }) {
   return (
     <Layout>
       <Head>
@@ -19,41 +20,68 @@ export default function Stores() {
         <h1>Locations</h1>
 
         <div className={styles.stores}>
-
           <div className={styles.storesLocations}>
             <ul className={styles.locations}>
-              <li>
-                <p className={styles.locationName}>
-                  Name
-                </p>
-                <address>
-                  Address
-                </address>
-                <p>
-                  1234567890
-                </p>
-                <p className={styles.locationDiscovery}>
-                  <button>
-                    View on Map
-                  </button>
-                  <a href="https://www.google.com/maps/" target="_blank" rel="noreferrer">
-                    Get Directions
-                    <FaExternalLinkAlt />
-                  </a>
-                </p>
-              </li>
+              {storeLocations.map((location) => (
+                <li key={location.id}>
+                  <p className={styles.locationName}>{location.name}</p>
+                  <address>{location.address}</address>
+                  <p>{location.phoneNumber}</p>
+                  <p className={styles.locationDiscovery}>
+                    <button>View on Map</button>
+                    <a
+                      href={`https://www.google.com.br/maps/dir//${location.location.latitude},${location.location.longitude}/@${location.location.latitude},${location.location.longitude},12z`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Get Directions
+                      <FaExternalLinkAlt />
+                    </a>
+                  </p>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div className={styles.storesMap}>
             <div className={styles.storesMapContainer}>
-              <div className={styles.map}>
-                Map
-              </div>
+              <div className={styles.map}>Map</div>
             </div>
           </div>
         </div>
       </Container>
     </Layout>
-  )
+  );
+}
+
+export async function getStaticProps() {
+  const client = new ApolloClient({
+    uri: "https://api-sa-east-1.graphcms.com/v2/cl4m0woe776xq01xvfzgw4s3k/master",
+    cache: new InMemoryCache(),
+  });
+
+  const data = await client.query({
+    query: gql`
+      query PageStores {
+        storeLocations {
+          address
+          id
+          name
+          phoneNumber
+          location {
+            longitude
+            latitude
+          }
+        }
+      }
+    `,
+  });
+
+  const storeLocations = data.data.storeLocations;
+
+  return {
+    props: {
+      storeLocations,
+    },
+  };
 }
