@@ -9,6 +9,7 @@ import Button from "@components/Button";
 import styles from "@styles/Page.module.scss";
 import Image from "next/image";
 import Link from "next/link";
+import { buildImage } from "@lib/cloudinary";
 
 export default function Category({ category, products }) {
   return (
@@ -24,39 +25,44 @@ export default function Category({ category, products }) {
         <h2>Products</h2>
 
         <ul className={styles.products}>
-          {products.map((product) => (
-            <li key={product.id}>
-              <Link href={`/products/${product.slug}`}>
-                <a>
-                  <div className={styles.productImage}>
-                    <Image
-                      width={product.image.width}
-                      height={product.image.height}
-                      src={product.image.url}
-                      alt={product.name}
-                    />
-                  </div>
-                  <h3 className={styles.productTitle}>{product.name}</h3>
-                  <p className={styles.productPrice}>
-                    $ {product.price.toFixed(2)}
-                  </p>
-                </a>
-              </Link>
-              <p>
-                <Button
-                  className="snipcart-add-item"
-                  data-item-id={product.id}
-                  data-item-price={product.price}
-                  data-item-url={`/products/${product.slug}`}
-                  data-item-description={product.description?.text}
-                  data-item-image={product.image.url}
-                  data-item-name={product.name}
-                >
-                  Add to Cart
-                </Button>
-              </p>
-            </li>
-          ))}
+          {products.map((product) => {
+            const imageUrl = buildImage(product.image.public_id)
+              .resize("w_900,h_900")
+              .toURL();
+            return (
+              <li key={product.id}>
+                <Link href={`/products/${product.slug}`}>
+                  <a>
+                    <div className={styles.productImage}>
+                      <Image
+                        width="900"
+                        height="900"
+                        src={imageUrl}
+                        alt={product.name}
+                      />
+                    </div>
+                    <h3 className={styles.productTitle}>{product.name}</h3>
+                    <p className={styles.productPrice}>
+                      $ {product.price.toFixed(2)}
+                    </p>
+                  </a>
+                </Link>
+                <p>
+                  <Button
+                    className="snipcart-add-item"
+                    data-item-id={product.id}
+                    data-item-price={product.price}
+                    data-item-url={`/products/${product.slug}`}
+                    data-item-description={product.description?.text}
+                    data-item-image={imageUrl}
+                    data-item-name={product.name}
+                  >
+                    Add to Cart
+                  </Button>
+                </p>
+              </li>
+            );
+          })}
         </ul>
       </Container>
     </Layout>

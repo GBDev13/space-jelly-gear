@@ -9,6 +9,7 @@ import Button from "@components/Button";
 
 import styles from "@styles/Page.module.scss";
 import Image from "next/image";
+import { buildImage } from "@lib/cloudinary";
 
 export default function Home({ home, products }) {
   const { heroTitle, heroText, heroLink, heroBackground } = home;
@@ -32,7 +33,7 @@ export default function Home({ home, products }) {
               </div>
               <Image
                 className={styles.heroImage}
-                src={heroBackground.url}
+                src={buildImage(heroBackground.public_id).toURL()}
                 width={heroBackground.width}
                 height={heroBackground.height}
                 alt=""
@@ -45,15 +46,18 @@ export default function Home({ home, products }) {
 
         <ul className={styles.products}>
           {products.map((product) => {
+            const imageUrl = buildImage(product.image.public_id)
+              .resize("w_900,h_900")
+              .toURL();
             return (
               <li key={product.slug}>
                 <Link href={`/products/${product.slug}`}>
                   <a>
                     <div className={styles.productImage}>
                       <Image
-                        width={product.image.width}
-                        height={product.image.height}
-                        src={product.image.url}
+                        width="900"
+                        height="900"
+                        src={imageUrl}
                         alt={product.name}
                       />
                     </div>
@@ -68,7 +72,7 @@ export default function Home({ home, products }) {
                     data-item-price={product.price}
                     data-item-url={`/products/${product.slug}`}
                     data-item-description={product.description?.text}
-                    data-item-image={product.image.url}
+                    data-item-image={imageUrl}
                     data-item-name={product.name}
                   >
                     Add to Cart
