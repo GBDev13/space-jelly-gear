@@ -88,11 +88,7 @@ export async function getStaticProps() {
           heroTitle
           heroText
           heroLink
-          heroBackground {
-            height
-            width
-            url
-          }
+          heroBackground
           slug
         }
         products(first: 4) {
@@ -100,11 +96,7 @@ export async function getStaticProps() {
           slug
           name
           price
-          image {
-            height
-            width
-            url
-          }
+          image
         }
       }
     `,
