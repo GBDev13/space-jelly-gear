@@ -83,7 +83,8 @@ export default function Home({ home, products }) {
   );
 }
 
-export async function getStaticProps() {
+export async function getStaticProps({ locale }) {
+  console.log(locale);
   const client = new ApolloClient({
     uri: "https://api-sa-east-1.graphcms.com/v2/cl4m0woe776xq01xvfzgw4s3k/master",
     cache: new InMemoryCache(),
@@ -91,7 +92,7 @@ export async function getStaticProps() {
 
   const data = await client.query({
     query: gql`
-      query PageHome {
+      query PageHome($locale: Locale!) {
         page(where: { slug: "home" }) {
           id
           name
@@ -100,6 +101,11 @@ export async function getStaticProps() {
           heroLink
           heroBackground
           slug
+          localizations(locales: [$locale]) {
+            heroText
+            heroTitle
+            locale
+          }
         }
         products(where: { categories_some: { slug: "featured" } }) {
           id
@@ -110,9 +116,20 @@ export async function getStaticProps() {
         }
       }
     `,
+    variables: {
+      locale,
+    },
   });
 
-  const home = data.data.page;
+  let home = data.data.page;
+
+  if (home.localizations.length > 0) {
+    home = {
+      ...home,
+      ...home.localizations[0],
+    };
+  }
+
   const products = data.data.products;
 
   return {
